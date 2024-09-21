@@ -55,6 +55,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     debugImplementation(libs.androidx.ui.tooling)
 
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.landscapist.glide)
 
     implementation (project(":ui-api"))

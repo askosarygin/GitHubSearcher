@@ -2,9 +2,11 @@ package com.ggc.ui_api.usecases_results
 
 data class GetRepositoryContentResult(
     val resultCode: ResultCode,
-    val content: Content = Content(listOf(), listOf())
+    val content: Content = Content("", "", listOf(), listOf())
 ) {
     data class Content(
+        val owner: String,
+        val repo: String,
         val folders: List<Folder>,
         val files: List<File>
     ) {

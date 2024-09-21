@@ -2,8 +2,10 @@ package com.ggc.ui.screen_main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ggc.ui.navigation.NavRoutes
+import com.ggc.ui.navigation.nav_events.NavEventData
+import com.ggc.ui.navigation.nav_params.RepositoryInfo
 import com.ggc.ui_api.Interactor
-import com.ggc.ui_api.usecases_results.GetRepositoryContentResult
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult.SearchResult
 import kotlinx.coroutines.Dispatchers
@@ -43,22 +45,19 @@ class ScreenMainViewModel(
     }
 
     fun repositoryClicked(owner: String, repo: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = interactor.getRepositoryContent(owner, repo)
-
-            when(result.resultCode) {
-                GetRepositoryContentResult.ResultCode.INTERNAL_ERROR -> TODO()
-                GetRepositoryContentResult.ResultCode.NO_INTERNET -> TODO()
-                GetRepositoryContentResult.ResultCode.HTTP_ERROR -> TODO()
-                GetRepositoryContentResult.ResultCode.OK -> {
-                    println(result.content)
-                }
-            }
+        _modelState.update { currentState ->
+            currentState.copy(
+                navEventData = NavEventData(
+                    NavRoutes.ScreenRepositoryContent,
+                    RepositoryInfo(owner, repo)
+                )
+            )
         }
     }
 
     data class Model(
         val textFieldSearch: String = "",
         val searchResults: List<SearchResult> = listOf(),
+        val navEventData: NavEventData<RepositoryInfo>? = null
     )
 }

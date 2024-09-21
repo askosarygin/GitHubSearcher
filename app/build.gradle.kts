@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.converter.gson)
     implementation(libs.landscapist.glide)
+    implementation(libs.androidx.navigation.compose)
 
     implementation (project(":data"))
     implementation (project(":data-api"))

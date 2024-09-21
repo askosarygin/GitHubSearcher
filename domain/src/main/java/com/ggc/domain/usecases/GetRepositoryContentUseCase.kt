@@ -56,7 +56,12 @@ class GetRepositoryContentUseCase(
 
                 return GetRepositoryContentResult(
                     OK,
-                    Content(folders, files)
+                    Content(
+                        owner,
+                        repo,
+                        folders,
+                        files
+                    )
                 )
             }
         }

@@ -1,5 +1,7 @@
 package com.ggc.ui.screen_main
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,16 +30,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.ggc.ui.R.drawable.icon_search
 import com.ggc.ui.R.string.content_description_icon_search
 import com.ggc.ui.R.string.fork
 import com.ggc.ui.R.string.forks
+import com.ggc.ui.navigation.NavRoutes.ScreenRepositoryContent
 import com.ggc.ui.theme.ButtonSearchBackground
 import com.ggc.ui.theme.RepositoryCardTextDescription
 import com.ggc.ui.theme.RepositoryCardTextName
@@ -51,9 +56,27 @@ import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
 fun ScreenMain(
-    viewModel: ScreenMainViewModel
+    viewModel: ScreenMainViewModel,
+    navController: NavController
 ) {
+
     val modelState by viewModel.modelState.collectAsState()
+
+    modelState.navEventData?.let { navEvent ->
+        when (navEvent.navRoutes) {
+            ScreenRepositoryContent -> {
+                navController.currentBackStackEntry?.savedStateHandle?.set(
+                    "NAV_EVENT_KEY_OWNER_REPO",
+                    navEvent.data
+                )
+                navController.navigate(route = navEvent.navRoutes.route)
+            }
+
+            else -> {}
+        }
+    }
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -87,7 +110,17 @@ fun ScreenMain(
                     UserCard(
                         avatarUrl = userInfo.avatarUrl,
                         name = item.name,
-                        score = userInfo.score
+                        score = userInfo.score,
+                        onClick = remember {
+                            {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(userInfo.htmlUrl)
+                                    )
+                                )
+                            }
+                        }
                     )
                 }
                 item.repository?.let { repositoryInfo ->
@@ -153,14 +186,16 @@ private fun SearchButton(
 private fun UserCard(
     avatarUrl: String,
     name: String,
-    score: String
+    score: String,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(elevation = 4.dp, shape = RoundedCornerShape(size = 5.dp))
             .background(color = UserCardBackground, shape = RoundedCornerShape(size = 5.dp))
-            .padding(start = 25.dp, end = 15.dp, top = 25.dp, bottom = 25.dp),
+            .padding(start = 25.dp, end = 15.dp, top = 25.dp, bottom = 25.dp)
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GlideImage(

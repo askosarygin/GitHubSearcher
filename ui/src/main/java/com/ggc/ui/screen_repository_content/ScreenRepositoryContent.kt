@@ -1,11 +1,20 @@
 package com.ggc.ui.screen_repository_content
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -13,18 +22,62 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.ggc.ui.R.drawable.icon_file
 import com.ggc.ui.R.drawable.icon_folder
+import com.ggc.ui.theme.RepositoryContentDivider
 import com.ggc.ui.theme.RepositoryContentFile
 import com.ggc.ui.theme.RepositoryContentFolder
 import com.ggc.ui.theme.RepositoryContentText
 
 @Composable
-fun ScreenRepositoryContent() {
+fun ScreenRepositoryContent(
+    viewModel: ScreenRepositoryContentViewModel,
+    navController: NavController
+) {
+    val modelState by viewModel.modelState.collectAsState()
 
+    val context = LocalContext.current
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        items(items = modelState.content.folders) { folder ->
+            MenuItemFolder(
+                name = folder.name,
+                onClick = remember { {
+                    viewModel.menuItemFolderClicked(folder.path)
+                } }
+            )
+            HorizontalDivider(
+                thickness = 2.dp,
+                color = RepositoryContentDivider
+            )
+        }
+
+        items(items = modelState.content.files) { file ->
+            MenuItemFile(
+                name = file.name,
+                onClick = remember { {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(file.htmlUrl)
+                        )
+                    )
+                } }
+            )
+            HorizontalDivider(
+                thickness = 2.dp,
+                color = RepositoryContentDivider
+            )
+        }
+    }
 }
 
 @Composable
@@ -61,7 +114,9 @@ private fun MenuItem(
     onClick: () -> Unit
 ) {
     Layout(
-        modifier = Modifier.clickable(onClick = onClick).padding(start = 10.dp),
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .padding(start = 10.dp),
         content = {
             Image(
                 modifier = Modifier
