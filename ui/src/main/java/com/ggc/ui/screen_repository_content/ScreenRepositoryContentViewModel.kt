@@ -19,6 +19,8 @@ class ScreenRepositoryContentViewModel(
     private val _modelState = MutableStateFlow(Model())
     val modelState = _modelState.asStateFlow()
 
+    val contentHistory = mutableListOf<Content>()
+
     init {
         navParams?.let { repositoryInfo ->
             viewModelScope.launch(Dispatchers.IO) {
@@ -29,7 +31,9 @@ class ScreenRepositoryContentViewModel(
                     GetRepositoryContentResult.ResultCode.INTERNAL_ERROR -> TODO()
                     GetRepositoryContentResult.ResultCode.NO_INTERNET -> TODO()
                     GetRepositoryContentResult.ResultCode.HTTP_ERROR -> TODO()
+
                     GetRepositoryContentResult.ResultCode.OK -> {
+                        contentHistory.add(result.content)
                         updateContent(result.content)
                     }
                 }
@@ -40,8 +44,8 @@ class ScreenRepositoryContentViewModel(
     fun menuItemFolderClicked(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val result = interactor.getRepositoryContent(
-                modelState.value.content.owner,
-                modelState.value.content.repo,
+                modelState.value.currentContent.owner,
+                modelState.value.currentContent.repo,
                 path
             )
 
@@ -49,24 +53,27 @@ class ScreenRepositoryContentViewModel(
                 GetRepositoryContentResult.ResultCode.INTERNAL_ERROR -> TODO()
                 GetRepositoryContentResult.ResultCode.NO_INTERNET -> TODO()
                 GetRepositoryContentResult.ResultCode.HTTP_ERROR -> TODO()
+
                 GetRepositoryContentResult.ResultCode.OK -> {
+                    contentHistory.add(result.content)
                     updateContent(result.content)
                 }
             }
         }
     }
 
-    fun menuItemFileClicked(htmlUrl: String) {
-        println("Кликнут файл со ссылкой $htmlUrl, открывается браузер")
+    fun buttonBackClicked() {
+        contentHistory.removeLastOrNull()
+        updateContent(contentHistory.last())
     }
 
     data class Model(
-        val content: Content = Content("", "", listOf(), listOf()),
+        val currentContent: Content = Content("", "", listOf(), listOf())
     )
 
     private fun updateContent(content: Content) {
         _modelState.update { currentState ->
-            currentState.copy(content = content)
+            currentState.copy(currentContent = content)
         }
     }
 }

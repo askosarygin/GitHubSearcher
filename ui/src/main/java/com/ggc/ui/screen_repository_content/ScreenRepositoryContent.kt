@@ -2,6 +2,7 @@ package com.ggc.ui.screen_repository_content
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,16 +44,18 @@ fun ScreenRepositoryContent(
 
     val context = LocalContext.current
 
+    BackHandler {
+        viewModel.buttonBackClicked()
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        items(items = modelState.content.folders) { folder ->
+        items(items = modelState.currentContent.folders) { folder ->
             MenuItemFolder(
                 name = folder.name,
-                onClick = remember { {
-                    viewModel.menuItemFolderClicked(folder.path)
-                } }
+                onClick = { viewModel.menuItemFolderClicked(folder.path) }
             )
             HorizontalDivider(
                 thickness = 2.dp,
@@ -60,17 +63,12 @@ fun ScreenRepositoryContent(
             )
         }
 
-        items(items = modelState.content.files) { file ->
+        items(items = modelState.currentContent.files) { file ->
             MenuItemFile(
                 name = file.name,
-                onClick = remember { {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(file.htmlUrl)
-                        )
-                    )
-                } }
+                onClick = {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(file.htmlUrl)))
+                }
             )
             HorizontalDivider(
                 thickness = 2.dp,

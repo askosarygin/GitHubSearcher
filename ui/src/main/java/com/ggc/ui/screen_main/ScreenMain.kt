@@ -96,7 +96,7 @@ fun ScreenMain(
             )
 
             SearchButton(
-                onClick = remember { { viewModel.buttonSearchPressed() } }
+                onClick = remember { { viewModel.buttonSearchClicked() } }
             )
         }
 

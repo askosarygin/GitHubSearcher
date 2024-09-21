@@ -27,7 +27,7 @@ class ScreenMainViewModel(
         }
     }
 
-    fun buttonSearchPressed() {
+    fun buttonSearchClicked() {
         viewModelScope.launch(Dispatchers.IO) {
             val result = interactor.searchInGitHubByText(modelState.value.textFieldSearch)
 
