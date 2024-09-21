@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">GitHubSearcher</string>
+    <string name="fork">Fork</string>
+    <string name="forks">Forks</string>
+    <string name="AAAAAAAA">AAAAAAAAAAA</string>
+
+
+
+
+    <string name="content_description_icon_search">Icon search</string>
+    <string name="content_description_user_avatar">User avatar</string>
+</resources>

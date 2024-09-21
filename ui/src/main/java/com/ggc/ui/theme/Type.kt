@@ -1,4 +1,4 @@
-package com.ggc.githubsearcher.ui.theme
+package com.ggc.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

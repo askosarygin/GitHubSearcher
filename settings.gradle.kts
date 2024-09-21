@@ -21,3 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "GitHubSearcher"
 include(":app")
+include(":data")
+include(":domain")
+include(":data-api")
+include(":ui")
+include(":ui-api")
