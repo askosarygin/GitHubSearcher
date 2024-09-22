@@ -33,23 +33,29 @@ class ScreenMainViewModel(
 
     fun buttonSearchClicked() {
         viewModelScope.launch(Dispatchers.IO) {
-            if (modelState.searchResults.isNotEmpty()) updateSearchResults(listOf())
             updateTextFieldSearchEnabled(false)
             updateButtonSearchEnabled(false)
             updateShowProgressBar(true)
             val result = interactor.searchInGitHubByText(modelState.textFieldSearch)
 
             when (result.resultCode) {
-                SearchInGitHubByTextResult.ResultCode.INTERNAL_ERROR -> TODO()
-                SearchInGitHubByTextResult.ResultCode.NO_INTERNET -> TODO()
-                SearchInGitHubByTextResult.ResultCode.HTTP_ERROR -> TODO()
+                SearchInGitHubByTextResult.ResultCode.INTERNAL_ERROR -> {
+                    updateErrorBannerMessage(result.resultMessage)
+                    updateShowProgressBar(false)
+                    updateshowErrorBanner(true)
+                }
+                SearchInGitHubByTextResult.ResultCode.HTTP_ERROR -> {
+                    updateErrorBannerMessage(result.resultMessage)
+                    updateShowProgressBar(false)
+                    updateshowErrorBanner(true)
+                }
                 SearchInGitHubByTextResult.ResultCode.OK -> {
+                    updateTextFieldSearchEnabled(true)
+                    updateButtonSearchEnabled(true)
+                    updateShowProgressBar(false)
                     updateSearchResults(result.searchResults)
                 }
             }
-            updateTextFieldSearchEnabled(true)
-            updateButtonSearchEnabled(true)
-            updateShowProgressBar(false)
         }
     }
 
@@ -62,14 +68,40 @@ class ScreenMainViewModel(
         )
     }
 
+    fun buttonTryAgainClicked() {
+        updateshowErrorBanner(false)
+        updateShowProgressBar(true)
+        buttonSearchClicked()
+    }
+
+    fun errorBannerCloseClicked() {
+        updateTextFieldSearchEnabled(true)
+        updateButtonSearchEnabled(true)
+        updateshowErrorBanner(false)
+    }
+
     data class Model(
         val textFieldSearchEnabled: Boolean = true,
         val buttonSearchEnabled: Boolean = false,
         val showProgressBar: Boolean = false,
+        val showErrorBanner: Boolean = false,
+        val errorBannerMessage: String = "",
         val textFieldSearch: String = "",
         val searchResults: List<SearchResult> = listOf(),
         val navEventData: NavSingleLifeEventWithNavArgs<RepositoryInfo>? = null
     )
+
+    private fun updateshowErrorBanner(showErrorBanner: Boolean) {
+        _modelState.update { currentState ->
+            currentState.copy(showErrorBanner = showErrorBanner)
+        }
+    }
+
+    private fun updateErrorBannerMessage(errorBannerMessage: String) {
+        _modelState.update { currentState ->
+            currentState.copy(errorBannerMessage = errorBannerMessage)
+        }
+    }
 
     private fun updateTextFieldSearchEnabled(textFieldSearchEnabled: Boolean) {
         _modelState.update { currentState ->

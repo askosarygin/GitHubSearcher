@@ -33,3 +33,13 @@ val RepositoryContentFolder = Color(0xFFFFBB33)
 val RepositoryContentFile = Color(0xFFAAAAAA)
 val RepositoryContentText = Color(0xFF747474)
 val RepositoryContentDivider = Color(0xFFCDCDCD)
+
+
+val ErrorBannerButtonText = Color(0xFF000000)
+val ErrorBannerButton = Color(0xFFD6D7D7)
+val ErrorBannerErrorText = Color(0xFF000000)
+val ErrorBannerBackground = Color(0x40FFFFFF)
+val ErrorBannerBackgroundSmall = Color(0xFFFAFAFA)
+
+
+val ProgressBannerBackground = Color(0x40FFFFFF)

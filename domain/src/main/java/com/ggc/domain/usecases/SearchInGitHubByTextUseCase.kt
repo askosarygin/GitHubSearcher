@@ -5,7 +5,6 @@ import com.ggc.data_api.github.responses.ResponseResult
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult.ResultCode.HTTP_ERROR
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult.ResultCode.INTERNAL_ERROR
-import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult.ResultCode.NO_INTERNET
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult.ResultCode.OK
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult.SearchResult
 
@@ -18,13 +17,16 @@ class SearchInGitHubByTextUseCase(
         val searchRepositoriesResult = repositoryGitHub.searchRepositoriesByName(text)
         when (searchRepositoriesResult.resultCode) {
             ResponseResult.ResultCode.INTERNAL_ERROR ->
-                return SearchInGitHubByTextResult(INTERNAL_ERROR)
-
-            ResponseResult.ResultCode.NO_INTERNET ->
-                return SearchInGitHubByTextResult(NO_INTERNET)
+                return SearchInGitHubByTextResult(
+                    INTERNAL_ERROR,
+                    searchRepositoriesResult.resultMessage
+                )
 
             ResponseResult.ResultCode.HTTP_ERROR ->
-                return SearchInGitHubByTextResult(HTTP_ERROR)
+                return SearchInGitHubByTextResult(
+                    HTTP_ERROR,
+                    searchRepositoriesResult.resultMessage
+                )
 
             ResponseResult.ResultCode.OK -> {
                 searchRepositoriesResult.response.items.forEach { repository ->
@@ -46,13 +48,16 @@ class SearchInGitHubByTextUseCase(
         val searchUsersResult = repositoryGitHub.searchUsersByName(text)
         when (searchUsersResult.resultCode) {
             ResponseResult.ResultCode.INTERNAL_ERROR ->
-                return SearchInGitHubByTextResult(INTERNAL_ERROR)
-
-            ResponseResult.ResultCode.NO_INTERNET ->
-                return SearchInGitHubByTextResult(NO_INTERNET)
+                return SearchInGitHubByTextResult(
+                    INTERNAL_ERROR,
+                    searchUsersResult.resultMessage
+                )
 
             ResponseResult.ResultCode.HTTP_ERROR ->
-                return SearchInGitHubByTextResult(HTTP_ERROR)
+                return SearchInGitHubByTextResult(
+                    HTTP_ERROR,
+                    searchUsersResult.resultMessage
+                )
 
             ResponseResult.ResultCode.OK -> {
                 searchUsersResult.response.items.forEach { user ->
@@ -72,6 +77,7 @@ class SearchInGitHubByTextUseCase(
 
         return SearchInGitHubByTextResult(
             OK,
+            "OK",
             searchResults.sortedBy { it.name }
         )
     }

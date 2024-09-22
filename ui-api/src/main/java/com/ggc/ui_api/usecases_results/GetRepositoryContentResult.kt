@@ -2,6 +2,7 @@ package com.ggc.ui_api.usecases_results
 
 data class GetRepositoryContentResult(
     val resultCode: ResultCode,
+    val resultMessage: String,
     val content: Content = Content("", "", listOf(), listOf())
 ) {
     data class Content(
@@ -23,7 +24,6 @@ data class GetRepositoryContentResult(
 
     enum class ResultCode {
         INTERNAL_ERROR,
-        NO_INTERNET,
         HTTP_ERROR,
         OK
     }

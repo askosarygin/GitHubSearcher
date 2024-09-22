@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
 
@@ -47,10 +46,7 @@ class MainActivity : ComponentActivity() {
                         val viewModel = viewModel(
                             initializer = {
                                 ScreenMainViewModel(
-                                    InteractorImpl(
-                                        SearchInGitHubByTextUseCase(DI.getRepositoryGitHub()),
-                                        GetRepositoryContentUseCase(DI.getRepositoryGitHub())
-                                    )
+                                    DI.getInteractor()
                                 )
                             }
                         )
@@ -65,10 +61,7 @@ class MainActivity : ComponentActivity() {
                         val viewModel = viewModel(
                             initializer = {
                                 ScreenRepositoryContentViewModel(
-                                    InteractorImpl(
-                                        SearchInGitHubByTextUseCase(DI.getRepositoryGitHub()),
-                                        GetRepositoryContentUseCase(DI.getRepositoryGitHub())
-                                    )
+                                    DI.getInteractor()
                                 )
                             }
                         )
@@ -83,21 +76,6 @@ class MainActivity : ComponentActivity() {
 
             }
         }
-    }
-}
-
-@Preview(widthDp = 490, heightDp = 1060)
-//@Preview(widthDp = 1060, heightDp = 490)
-@Composable
-private fun Preview() {
-    GitHubSearcherTheme {
-//        ScreenMain(
-//            ScreenMainViewModel(
-//                InteractorImpl(
-//                    SearchInGitHubByTextUseCase(DI.getRepositoryGitHub())
-//                )
-//            )
-//        )
     }
 }
 

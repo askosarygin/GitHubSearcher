@@ -2,6 +2,7 @@ package com.ggc.ui_api.usecases_results
 
 data class SearchInGitHubByTextResult(
     val resultCode: ResultCode,
+    val resultMessage: String,
     val searchResults: List<SearchResult> = listOf()
 ) {
     data class SearchResult(
@@ -25,7 +26,6 @@ data class SearchInGitHubByTextResult(
 
     enum class ResultCode {
         INTERNAL_ERROR,
-        NO_INTERNET,
         HTTP_ERROR,
         OK
     }

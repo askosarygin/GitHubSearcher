@@ -8,7 +8,6 @@ import com.ggc.ui_api.usecases_results.GetRepositoryContentResult.Content.File
 import com.ggc.ui_api.usecases_results.GetRepositoryContentResult.Content.Folder
 import com.ggc.ui_api.usecases_results.GetRepositoryContentResult.ResultCode.HTTP_ERROR
 import com.ggc.ui_api.usecases_results.GetRepositoryContentResult.ResultCode.INTERNAL_ERROR
-import com.ggc.ui_api.usecases_results.GetRepositoryContentResult.ResultCode.NO_INTERNET
 import com.ggc.ui_api.usecases_results.GetRepositoryContentResult.ResultCode.OK
 
 class GetRepositoryContentUseCase(
@@ -23,13 +22,16 @@ class GetRepositoryContentUseCase(
 
         when (getRepositoryContentResult.resultCode) {
             ResponseResult.ResultCode.INTERNAL_ERROR ->
-                return GetRepositoryContentResult(INTERNAL_ERROR)
-
-            ResponseResult.ResultCode.NO_INTERNET ->
-                return GetRepositoryContentResult(NO_INTERNET)
+                return GetRepositoryContentResult(
+                    INTERNAL_ERROR,
+                    getRepositoryContentResult.resultMessage
+                )
 
             ResponseResult.ResultCode.HTTP_ERROR ->
-                return GetRepositoryContentResult(HTTP_ERROR)
+                return GetRepositoryContentResult(
+                    HTTP_ERROR,
+                    getRepositoryContentResult.resultMessage
+                )
 
             ResponseResult.ResultCode.OK -> {
                 val folders = mutableListOf<Folder>()
@@ -56,6 +58,7 @@ class GetRepositoryContentUseCase(
 
                 return GetRepositoryContentResult(
                     OK,
+                    getRepositoryContentResult.resultMessage,
                     Content(
                         owner,
                         repo,
