@@ -32,7 +32,6 @@ import androidx.navigation.NavController
 import com.ggc.ui.R.drawable.icon_file
 import com.ggc.ui.R.drawable.icon_folder
 import com.ggc.ui.navigation.NavRoutes
-import com.ggc.ui.navigation.nav_params.RepositoryInfo
 import com.ggc.ui.theme.RepositoryContentDivider
 import com.ggc.ui.theme.RepositoryContentFile
 import com.ggc.ui.theme.RepositoryContentFolder
@@ -43,7 +42,7 @@ fun ScreenRepositoryContent(
     viewModel: ScreenRepositoryContentViewModel,
     navController: NavController
 ) {
-    val modelState by viewModel.modelState.collectAsState()
+    val modelState by viewModel.modelStateFlow.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
         if (modelState.currentContent.folders.isEmpty() && modelState.currentContent.files.isEmpty()) {

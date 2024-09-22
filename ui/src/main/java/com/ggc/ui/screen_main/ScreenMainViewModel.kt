@@ -19,56 +19,87 @@ class ScreenMainViewModel(
 ) : ViewModel() {
 
     private val _modelState = MutableStateFlow(Model())
-    val modelState = _modelState.asStateFlow()
+    val modelStateFlow = _modelState.asStateFlow()
+
+    private val modelState: Model
+        get() {
+            return modelStateFlow.value
+        }
 
     fun textFieldSearchChanged(newTextFieldValue: String) {
-        _modelState.update { currentState ->
-            currentState.copy(textFieldSearch = newTextFieldValue)
-        }
+        updateButtonSearchEnabled(!(newTextFieldValue.length < 3))
+        updateTextFieldSearch(newTextFieldValue)
     }
 
     fun buttonSearchClicked() {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = interactor.searchInGitHubByText(modelState.value.textFieldSearch)
+            if (modelState.searchResults.isNotEmpty()) updateSearchResults(listOf())
+            updateTextFieldSearchEnabled(false)
+            updateButtonSearchEnabled(false)
+            updateShowProgressBar(true)
+            val result = interactor.searchInGitHubByText(modelState.textFieldSearch)
 
             when (result.resultCode) {
                 SearchInGitHubByTextResult.ResultCode.INTERNAL_ERROR -> TODO()
                 SearchInGitHubByTextResult.ResultCode.NO_INTERNET -> TODO()
                 SearchInGitHubByTextResult.ResultCode.HTTP_ERROR -> TODO()
                 SearchInGitHubByTextResult.ResultCode.OK -> {
-                    _modelState.update { currentState ->
-                        currentState.copy(searchResults = result.searchResults)
-                    }
+                    updateSearchResults(result.searchResults)
                 }
             }
+            updateTextFieldSearchEnabled(true)
+            updateButtonSearchEnabled(true)
+            updateShowProgressBar(false)
         }
     }
 
     fun repositoryClicked(owner: String, repo: String) {
-        _modelState.update { currentState ->
-            currentState.copy(
-                navEventData = NavSingleLifeEventWithNavArgs(
-                    NavRoutes.ScreenRepositoryContent,
-                    RepositoryInfo(owner, repo)
-                )
+        updateNavEventData(
+            NavSingleLifeEventWithNavArgs(
+                NavRoutes.ScreenRepositoryContent,
+                RepositoryInfo(owner, repo)
             )
-        }
+        )
     }
 
     data class Model(
+        val textFieldSearchEnabled: Boolean = true,
+        val buttonSearchEnabled: Boolean = false,
+        val showProgressBar: Boolean = false,
         val textFieldSearch: String = "",
-        val searchResults: List<SearchResult> = listOf(
-//            SearchResult(
-//                "Repository name",
-//                repository = SearchResult.Repository(
-//                    15,
-//                    "Repository description",
-//                    "OwnerName",
-//                    "RepositoryRepo")
-//            )
-        ),
+        val searchResults: List<SearchResult> = listOf(),
         val navEventData: NavSingleLifeEventWithNavArgs<RepositoryInfo>? = null
     )
+
+    private fun updateTextFieldSearchEnabled(textFieldSearchEnabled: Boolean) {
+        _modelState.update { currentState ->
+            currentState.copy(textFieldSearchEnabled = textFieldSearchEnabled)
+        }
+    }
+
+    private fun updateButtonSearchEnabled(buttonSearchEnabled: Boolean) {
+        _modelState.update { currentState ->
+            currentState.copy(buttonSearchEnabled = buttonSearchEnabled)
+        }
+    }
+
+    private fun updateShowProgressBar(showProgressBar: Boolean) {
+        _modelState.update { currentState ->
+            currentState.copy(showProgressBar = showProgressBar)
+        }
+    }
+
+    private fun updateTextFieldSearch(textFieldSearch: String) {
+        _modelState.update { currentState ->
+            currentState.copy(textFieldSearch = textFieldSearch)
+        }
+    }
+
+    private fun updateSearchResults(searchResults: List<SearchResult>) {
+        _modelState.update { currentState ->
+            currentState.copy(searchResults = searchResults)
+        }
+    }
 
     private fun updateNavEventData(navEventData: NavSingleLifeEventWithNavArgs<RepositoryInfo>?) {
         _modelState.update { currentState ->

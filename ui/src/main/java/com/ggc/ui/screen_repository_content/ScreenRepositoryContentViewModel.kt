@@ -17,9 +17,14 @@ class ScreenRepositoryContentViewModel(
     private val interactor: Interactor
 ) : ViewModel() {
     private val _modelState = MutableStateFlow(Model())
-    val modelState = _modelState.asStateFlow()
+    val modelStateFlow = _modelState.asStateFlow()
 
-    private val contentCache = MutableStateFlow(mutableListOf<Content>())
+    private val modelState: Model
+        get() {
+            return modelStateFlow.value
+        }
+
+    private val contentCache = mutableListOf<Content>()
 
     fun init(owner: String, repo: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -31,7 +36,7 @@ class ScreenRepositoryContentViewModel(
                 GetRepositoryContentResult.ResultCode.HTTP_ERROR -> TODO()
 
                 GetRepositoryContentResult.ResultCode.OK -> {
-                    contentCache.value.add(result.content)
+                    contentCache.add(result.content)
                     updateContent(result.content)
                 }
             }
@@ -41,8 +46,8 @@ class ScreenRepositoryContentViewModel(
     fun menuItemFolderClicked(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val result = interactor.getRepositoryContent(
-                modelState.value.currentContent.owner,
-                modelState.value.currentContent.repo,
+                modelState.currentContent.owner,
+                modelState.currentContent.repo,
                 path
             )
 
@@ -52,7 +57,7 @@ class ScreenRepositoryContentViewModel(
                 GetRepositoryContentResult.ResultCode.HTTP_ERROR -> TODO()
 
                 GetRepositoryContentResult.ResultCode.OK -> {
-                    contentCache.value.add(result.content)
+                    contentCache.add(result.content)
                     updateContent(result.content)
                 }
             }
@@ -60,9 +65,9 @@ class ScreenRepositoryContentViewModel(
     }
 
     fun buttonBackClicked() {
-        contentCache.value.removeLastOrNull()
-        if (contentCache.value.isNotEmpty()) {
-            updateContent(contentCache.value.last())
+        contentCache.removeLastOrNull()
+        if (contentCache.isNotEmpty()) {
+            updateContent(contentCache.last())
         } else {
             updateNavEvent(NavSingleLifeEvent(NavRoutes.ScreenMain))
         }
