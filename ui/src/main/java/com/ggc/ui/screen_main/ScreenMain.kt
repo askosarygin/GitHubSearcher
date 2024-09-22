@@ -22,9 +22,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -38,10 +42,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import com.ggc.ui.R.drawable.icon_search
 import com.ggc.ui.R.string.content_description_icon_search
 import com.ggc.ui.R.string.fork
 import com.ggc.ui.R.string.forks
+import com.ggc.ui.navigation.NavRoutes
+import com.ggc.ui.navigation.NavRoutes.ScreenMain
 import com.ggc.ui.navigation.NavRoutes.ScreenRepositoryContent
 import com.ggc.ui.theme.ButtonSearchBackground
 import com.ggc.ui.theme.RepositoryCardTextDescription
@@ -62,14 +69,12 @@ fun ScreenMain(
 
     val modelState by viewModel.modelState.collectAsState()
 
-    modelState.navEventData?.let { navEvent ->
-        when (navEvent.navRoutes) {
+    modelState.navEventData?.use { navRoutes, navArgs ->
+        when (navRoutes) {
             ScreenRepositoryContent -> {
-                navController.currentBackStackEntry?.savedStateHandle?.set(
-                    "NAV_EVENT_KEY_OWNER_REPO",
-                    navEvent.data
+                navController.navigate(
+                    route = navRoutes.route + "/${navArgs.owner}" + "/${navArgs.repo}"
                 )
-                navController.navigate(route = navEvent.navRoutes.route)
             }
 
             else -> {}
@@ -111,7 +116,7 @@ fun ScreenMain(
                         avatarUrl = userInfo.avatarUrl,
                         name = item.name,
                         score = userInfo.score,
-                        onClick = remember {
+                        onClick = remember(key1 = modelState.searchResults) {
                             {
                                 context.startActivity(
                                     Intent(
@@ -128,7 +133,7 @@ fun ScreenMain(
                         name = item.name,
                         forksCount = repositoryInfo.forksCount,
                         description = repositoryInfo.description,
-                        onClick = remember {
+                        onClick = remember(key1 = modelState.searchResults) {
                             {
                                 viewModel.repositoryClicked(
                                     repositoryInfo.owner,

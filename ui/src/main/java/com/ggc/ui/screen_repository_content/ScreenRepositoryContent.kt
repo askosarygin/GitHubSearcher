@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -30,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ggc.ui.R.drawable.icon_file
 import com.ggc.ui.R.drawable.icon_folder
+import com.ggc.ui.navigation.NavRoutes
+import com.ggc.ui.navigation.nav_params.RepositoryInfo
 import com.ggc.ui.theme.RepositoryContentDivider
 import com.ggc.ui.theme.RepositoryContentFile
 import com.ggc.ui.theme.RepositoryContentFolder
@@ -41,6 +44,28 @@ fun ScreenRepositoryContent(
     navController: NavController
 ) {
     val modelState by viewModel.modelState.collectAsState()
+
+    LaunchedEffect(key1 = Unit) {
+        if (modelState.currentContent.folders.isEmpty() && modelState.currentContent.files.isEmpty()) {
+            navController.currentBackStackEntry?.arguments?.let { args ->
+                args.getString("owner")?.let { owner ->
+                    args.getString("repo")?.let { repo ->
+                        viewModel.init(owner, repo)
+                    }
+                }
+            }
+        }
+    }
+
+    modelState.navEvent?.use { navEvent ->
+        when (navEvent) {
+            NavRoutes.ScreenMain -> {
+                navController.popBackStack()
+            }
+
+            else -> {}
+        }
+    }
 
     val context = LocalContext.current
 
@@ -55,7 +80,9 @@ fun ScreenRepositoryContent(
         items(items = modelState.currentContent.folders) { folder ->
             MenuItemFolder(
                 name = folder.name,
-                onClick = { viewModel.menuItemFolderClicked(folder.path) }
+                onClick = remember(key1 = modelState.currentContent) {
+                    { viewModel.menuItemFolderClicked(folder.path) }
+                }
             )
             HorizontalDivider(
                 thickness = 2.dp,
@@ -66,8 +93,8 @@ fun ScreenRepositoryContent(
         items(items = modelState.currentContent.files) { file ->
             MenuItemFile(
                 name = file.name,
-                onClick = {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(file.htmlUrl)))
+                onClick = remember(key1 = modelState.currentContent) {
+                    { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(file.htmlUrl))) }
                 }
             )
             HorizontalDivider(

@@ -3,7 +3,7 @@ package com.ggc.ui.screen_main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ggc.ui.navigation.NavRoutes
-import com.ggc.ui.navigation.nav_events.NavEventData
+import com.ggc.ui.navigation.nav_events.NavSingleLifeEventWithNavArgs
 import com.ggc.ui.navigation.nav_params.RepositoryInfo
 import com.ggc.ui_api.Interactor
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult
@@ -47,7 +47,7 @@ class ScreenMainViewModel(
     fun repositoryClicked(owner: String, repo: String) {
         _modelState.update { currentState ->
             currentState.copy(
-                navEventData = NavEventData(
+                navEventData = NavSingleLifeEventWithNavArgs(
                     NavRoutes.ScreenRepositoryContent,
                     RepositoryInfo(owner, repo)
                 )
@@ -57,7 +57,22 @@ class ScreenMainViewModel(
 
     data class Model(
         val textFieldSearch: String = "",
-        val searchResults: List<SearchResult> = listOf(),
-        val navEventData: NavEventData<RepositoryInfo>? = null
+        val searchResults: List<SearchResult> = listOf(
+//            SearchResult(
+//                "Repository name",
+//                repository = SearchResult.Repository(
+//                    15,
+//                    "Repository description",
+//                    "OwnerName",
+//                    "RepositoryRepo")
+//            )
+        ),
+        val navEventData: NavSingleLifeEventWithNavArgs<RepositoryInfo>? = null
     )
+
+    private fun updateNavEventData(navEventData: NavSingleLifeEventWithNavArgs<RepositoryInfo>?) {
+        _modelState.update { currentState ->
+            currentState.copy(navEventData = navEventData)
+        }
+    }
 }
