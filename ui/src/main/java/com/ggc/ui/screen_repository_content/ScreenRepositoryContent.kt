@@ -63,7 +63,7 @@ fun ScreenRepositoryContent(
 
     modelState.navEvent?.use { navEvent ->
         when (navEvent) {
-            NavRoutes.ScreenMain -> {
+            is NavRoutes.ScreenMain -> {
                 navController.popBackStack()
             }
 
@@ -135,7 +135,6 @@ fun ScreenRepositoryContent(
         }
     }
 }
-
 
 
 @Composable

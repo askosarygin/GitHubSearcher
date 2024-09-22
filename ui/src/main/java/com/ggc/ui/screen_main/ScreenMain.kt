@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,7 +24,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -35,12 +33,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasurePolicy
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -52,20 +48,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.ggc.ui.R
 import com.ggc.ui.R.drawable.icon_search
 import com.ggc.ui.R.string.content_description_icon_search
 import com.ggc.ui.R.string.fork
 import com.ggc.ui.R.string.forks
-import com.ggc.ui.R.string.try_again
 import com.ggc.ui.common.ErrorBanner
 import com.ggc.ui.common.ProgressBanner
 import com.ggc.ui.navigation.NavRoutes.ScreenRepositoryContent
 import com.ggc.ui.theme.ButtonSearchBackgroundDisabled
 import com.ggc.ui.theme.ButtonSearchBackgroundEnabled
-import com.ggc.ui.theme.ErrorBannerButton
-import com.ggc.ui.theme.ErrorBannerButtonText
-import com.ggc.ui.theme.ErrorBannerErrorText
 import com.ggc.ui.theme.RepositoryCardTextDescription
 import com.ggc.ui.theme.RepositoryCardTextName
 import com.ggc.ui.theme.TextFieldBackground
@@ -84,11 +75,11 @@ fun ScreenMain(
 
     val modelState by viewModel.modelStateFlow.collectAsState()
 
-    modelState.navEventData?.use { navRoutes, navArgs ->
+    modelState.navEvent?.use { navRoutes ->
         when (navRoutes) {
-            ScreenRepositoryContent -> {
+            is ScreenRepositoryContent -> {
                 navController.navigate(
-                    route = navRoutes.route + "/${navArgs.owner}" + "/${navArgs.repo}"
+                    route = navRoutes.routeWithAttachedArgs
                 )
             }
 

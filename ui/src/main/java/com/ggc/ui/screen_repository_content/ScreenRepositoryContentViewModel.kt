@@ -34,24 +34,37 @@ class ScreenRepositoryContentViewModel(
             initOwner = owner
             initRepo = repo
             updateShowProgressBar(true)
-            val result = interactor.getRepositoryContent(owner, repo)
 
+            val result = interactor.getRepositoryContent(owner, repo)
             when (result.resultCode) {
                 GetRepositoryContentResult.ResultCode.INTERNAL_ERROR -> {
-                    updateErrorBannerMessage(result.resultMessage)
-                    updateShowProgressBar(false)
-                    updateShowErrorBanner(true)
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            errorBannerMessage = result.resultMessage,
+                            showProgressBar = false,
+                            showErrorBanner = true
+                        )
+                    }
                 }
                 GetRepositoryContentResult.ResultCode.HTTP_ERROR -> {
-                    updateErrorBannerMessage(result.resultMessage)
-                    updateShowProgressBar(false)
-                    updateShowErrorBanner(true)
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            errorBannerMessage = result.resultMessage,
+                            showProgressBar = false,
+                            showErrorBanner = true
+                        )
+                    }
                 }
 
                 GetRepositoryContentResult.ResultCode.OK -> {
                     contentCache.add(result.content)
-                    updateShowProgressBar(false)
-                    updateCurrentContent(result.content)
+
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            showProgressBar = false,
+                            currentContent = result.content
+                        )
+                    }
                 }
             }
         }
@@ -61,6 +74,7 @@ class ScreenRepositoryContentViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             lastClickedFolderPath = path
             updateShowProgressBar(true)
+
             val result = interactor.getRepositoryContent(
                 modelState.currentContent.owner,
                 modelState.currentContent.repo,
@@ -69,20 +83,32 @@ class ScreenRepositoryContentViewModel(
 
             when (result.resultCode) {
                 GetRepositoryContentResult.ResultCode.INTERNAL_ERROR -> {
-                    updateErrorBannerMessage(result.resultMessage)
-                    updateShowProgressBar(false)
-                    updateShowErrorBanner(true)
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            errorBannerMessage = result.resultMessage,
+                            showProgressBar = false,
+                            showErrorBanner = true
+                        )
+                    }
                 }
                 GetRepositoryContentResult.ResultCode.HTTP_ERROR -> {
-                    updateErrorBannerMessage(result.resultMessage)
-                    updateShowProgressBar(false)
-                    updateShowErrorBanner(true)
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            errorBannerMessage = result.resultMessage,
+                            showProgressBar = false,
+                            showErrorBanner = true
+                        )
+                    }
                 }
 
                 GetRepositoryContentResult.ResultCode.OK -> {
                     contentCache.add(result.content)
-                    updateShowProgressBar(false)
-                    updateCurrentContent(result.content)
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            showProgressBar = false,
+                            currentContent = result.content
+                        )
+                    }
                 }
             }
         }
@@ -93,13 +119,18 @@ class ScreenRepositoryContentViewModel(
         if (contentCache.isNotEmpty()) {
             updateCurrentContent(contentCache.last())
         } else {
-            updateNavEvent(NavSingleLifeEvent(NavRoutes.ScreenMain))
+            updateNavEvent(NavSingleLifeEvent(NavRoutes.ScreenMain()))
         }
     }
 
     fun buttonTryAgainClicked() {
-        updateShowErrorBanner(false)
-        updateShowProgressBar(true)
+        _modelState.update { currentState ->
+            currentState.copy(
+                showErrorBanner = false,
+                showProgressBar = true
+            )
+        }
+
         if (modelState.currentContent.files.isEmpty() && modelState.currentContent.folders.isEmpty()) {
             init(initOwner, initRepo)
         } else {
@@ -111,8 +142,12 @@ class ScreenRepositoryContentViewModel(
         if (modelState.currentContent.files.isEmpty() && modelState.currentContent.folders.isEmpty()) {
             buttonBackClicked()
         } else {
-            updateShowErrorBanner(false)
-            updateCurrentContent(contentCache.last())
+            _modelState.update { currentState ->
+                currentState.copy(
+                    showErrorBanner = false,
+                    currentContent = contentCache.last()
+                )
+            }
         }
     }
 

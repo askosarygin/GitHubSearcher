@@ -3,8 +3,9 @@ package com.ggc.ui.screen_main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ggc.ui.navigation.NavRoutes
-import com.ggc.ui.navigation.nav_events.NavSingleLifeEventWithNavArgs
-import com.ggc.ui.navigation.nav_params.RepositoryInfo
+import com.ggc.ui.navigation.NavRoutes.ScreenRepositoryContent
+import com.ggc.ui.navigation.NavRoutes.ScreenRepositoryContent.Args
+import com.ggc.ui.navigation.nav_events.NavSingleLifeEvent
 import com.ggc.ui_api.Interactor
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult
 import com.ggc.ui_api.usecases_results.SearchInGitHubByTextResult.SearchResult
@@ -27,33 +28,55 @@ class ScreenMainViewModel(
         }
 
     fun textFieldSearchChanged(newTextFieldValue: String) {
-        updateButtonSearchEnabled(!(newTextFieldValue.length < 3))
-        updateTextFieldSearch(newTextFieldValue)
+        _modelState.update { currentState ->
+            currentState.copy(
+                buttonSearchEnabled = !(newTextFieldValue.length < 3),
+                textFieldSearch = newTextFieldValue
+            )
+        }
     }
 
     fun buttonSearchClicked() {
         viewModelScope.launch(Dispatchers.IO) {
-            updateTextFieldSearchEnabled(false)
-            updateButtonSearchEnabled(false)
-            updateShowProgressBar(true)
+
+            _modelState.update { currentState ->
+                currentState.copy(
+                    textFieldSearchEnabled = false,
+                    buttonSearchEnabled = false,
+                    showProgressBar = true
+                )
+            }
+
             val result = interactor.searchInGitHubByText(modelState.textFieldSearch)
 
             when (result.resultCode) {
                 SearchInGitHubByTextResult.ResultCode.INTERNAL_ERROR -> {
-                    updateErrorBannerMessage(result.resultMessage)
-                    updateShowProgressBar(false)
-                    updateshowErrorBanner(true)
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            errorBannerMessage = result.resultMessage,
+                            showProgressBar = false,
+                            showErrorBanner = true
+                        )
+                    }
                 }
                 SearchInGitHubByTextResult.ResultCode.HTTP_ERROR -> {
-                    updateErrorBannerMessage(result.resultMessage)
-                    updateShowProgressBar(false)
-                    updateshowErrorBanner(true)
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            errorBannerMessage = result.resultMessage,
+                            showProgressBar = false,
+                            showErrorBanner = true
+                        )
+                    }
                 }
                 SearchInGitHubByTextResult.ResultCode.OK -> {
-                    updateTextFieldSearchEnabled(true)
-                    updateButtonSearchEnabled(true)
-                    updateShowProgressBar(false)
-                    updateSearchResults(result.searchResults)
+                    _modelState.update { currentState ->
+                        currentState.copy(
+                            textFieldSearchEnabled = true,
+                            buttonSearchEnabled = true,
+                            showProgressBar = false,
+                            searchResults = result.searchResults
+                        )
+                    }
                 }
             }
         }
@@ -61,23 +84,32 @@ class ScreenMainViewModel(
 
     fun repositoryClicked(owner: String, repo: String) {
         updateNavEventData(
-            NavSingleLifeEventWithNavArgs(
-                NavRoutes.ScreenRepositoryContent,
-                RepositoryInfo(owner, repo)
+            NavSingleLifeEvent(
+                ScreenRepositoryContent(
+                    Args(owner, repo)
+                )
             )
         )
     }
 
     fun buttonTryAgainClicked() {
-        updateshowErrorBanner(false)
-        updateShowProgressBar(true)
+        _modelState.update { currentState ->
+            currentState.copy(
+                showErrorBanner = false,
+                showProgressBar = true
+            )
+        }
         buttonSearchClicked()
     }
 
     fun errorBannerCloseClicked() {
-        updateTextFieldSearchEnabled(true)
-        updateButtonSearchEnabled(true)
-        updateshowErrorBanner(false)
+        _modelState.update { currentState ->
+            currentState.copy(
+                textFieldSearchEnabled = true,
+                buttonSearchEnabled = true,
+                showErrorBanner = false
+            )
+        }
     }
 
     data class Model(
@@ -88,10 +120,10 @@ class ScreenMainViewModel(
         val errorBannerMessage: String = "",
         val textFieldSearch: String = "",
         val searchResults: List<SearchResult> = listOf(),
-        val navEventData: NavSingleLifeEventWithNavArgs<RepositoryInfo>? = null
+        val navEvent: NavSingleLifeEvent? = null
     )
 
-    private fun updateshowErrorBanner(showErrorBanner: Boolean) {
+    private fun updateShowErrorBanner(showErrorBanner: Boolean) {
         _modelState.update { currentState ->
             currentState.copy(showErrorBanner = showErrorBanner)
         }
@@ -133,9 +165,9 @@ class ScreenMainViewModel(
         }
     }
 
-    private fun updateNavEventData(navEventData: NavSingleLifeEventWithNavArgs<RepositoryInfo>?) {
+    private fun updateNavEventData(navEvent: NavSingleLifeEvent?) {
         _modelState.update { currentState ->
-            currentState.copy(navEventData = navEventData)
+            currentState.copy(navEvent = navEvent)
         }
     }
 }

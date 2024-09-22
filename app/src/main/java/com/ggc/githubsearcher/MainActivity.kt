@@ -39,10 +39,9 @@ class MainActivity : ComponentActivity() {
             GitHubSearcherTheme {
                 NavHost(
                     navController = navController,
-                    startDestination = NavRoutes.ScreenMain.route
+                    startDestination = NavRoutes.ScreenMain().route
                 ) {
-
-                    composable(route = NavRoutes.ScreenMain.route) {
+                    composable(route = NavRoutes.ScreenMain().route) {
                         val viewModel = viewModel(
                             initializer = {
                                 ScreenMainViewModel(
@@ -57,7 +56,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable(route = NavRoutes.ScreenRepositoryContent.route+ "/{owner}" + "/{repo}") {
+                    composable(route = NavRoutes.ScreenRepositoryContent().route) {
                         val viewModel = viewModel(
                             initializer = {
                                 ScreenRepositoryContentViewModel(
@@ -72,8 +71,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
-
-
             }
         }
     }
